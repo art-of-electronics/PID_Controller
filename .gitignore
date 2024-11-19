@@ -19,6 +19,9 @@ env/
 *.out
 *.err
 
+# Data files
+*.json
+
 # Temporary files
 *.swp
 *.swo

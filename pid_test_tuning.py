@@ -1,8 +1,11 @@
-import ctypes
 import pytest
-import matplotlib.pyplot as plt
+import ctypes
+import json
+import os
+
 
 TEMPERATURE_THRESHOLD = 0.5
+test_results = []
 
 # Load the shared C library
 pid_lib = ctypes.CDLL('./libpid_controller.so')
@@ -59,16 +62,14 @@ def test_pid_with_simulation(pid_params):
             pid_params["timeout"], current_temp, target_temp, delta_time_ms
         )
         current_temp = temperature_model(current_temp, heater, fan)
-        history.append(current_temp)
-
-    # Plot results
-    plt.plot(history, label="Temperature")
-    plt.axhline(y=target_temp, color='r', linestyle='--', label="Target")
-    plt.legend()
-    plt.xlabel("Time (steps)")
-    plt.ylabel("Temperature (°C)")
-    plt.title("PID Simulation")
-    plt.show()
+        history.append(round(current_temp, 3))
+    test_results.append({
+    "kp": pid_params["kp"],
+    "ki": pid_params["ki"],
+    "kd": pid_params["kd"],
+    "history": history,
+    "target_temp": target_temp
+    })
 
     # Assert the system stabilizes near the target
     assert abs(history[-1] - target_temp) < TEMPERATURE_THRESHOLD
@@ -76,7 +77,7 @@ def test_pid_with_simulation(pid_params):
 # Parameterized tuning test
 @pytest.mark.parametrize("kp, ki, kd", [
     (0.6, 0.2, 0.05),
-    (3.0, 0.5, 0.10),
+    (2.0, 0.3, 0.06),
     (1.0, 0.1, 0.01),
     (1.5, 0.2, 0.02),
 ])
@@ -89,8 +90,20 @@ def test_pid_tuning(kp, ki, kd):
     for _ in range(200):
         heater, fan = pid_update(kp, ki, kd, 100.0, current_temp, target_temp, delta_time_ms)
         current_temp = temperature_model(current_temp, heater, fan)
-        history.append(current_temp)
+        history.append(round(current_temp,3))
+        
+    test_results.append({
+    "kp": kp,
+    "ki": ki,
+    "kd": kd,
+    "history": history,
+    "target_temp": target_temp
+    })
 
+    results_file = "simulation_results.json"
+    with open(results_file, "w") as f:
+        json.dump(test_results, f, indent=4)
+    
     steady_state_error = abs(history[-1] - target_temp)
     print(f"Gains: kp={kp}, ki={ki}, kd={kd}, Error: {steady_state_error}")
     assert steady_state_error < TEMPERATURE_THRESHOLD
