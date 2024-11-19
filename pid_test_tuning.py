@@ -2,6 +2,8 @@ import ctypes
 import pytest
 import matplotlib.pyplot as plt
 
+TEMPERATURE_THRESHOLD = 0.5
+
 # Load the shared C library
 pid_lib = ctypes.CDLL('./libpid_controller.so')
 
@@ -69,12 +71,12 @@ def test_pid_with_simulation(pid_params):
     plt.show()
 
     # Assert the system stabilizes near the target
-    assert abs(history[-1] - target_temp) < 0.5
+    assert abs(history[-1] - target_temp) < TEMPERATURE_THRESHOLD
 
 # Parameterized tuning test
 @pytest.mark.parametrize("kp, ki, kd", [
     (0.6, 0.2, 0.05),
-    #(3.0, 0.5, 0.10),
+    (3.0, 0.5, 0.10),
     (1.0, 0.1, 0.01),
     (1.5, 0.2, 0.02),
 ])
@@ -91,4 +93,4 @@ def test_pid_tuning(kp, ki, kd):
 
     steady_state_error = abs(history[-1] - target_temp)
     print(f"Gains: kp={kp}, ki={ki}, kd={kd}, Error: {steady_state_error}")
-    assert steady_state_error < 0.5
+    assert steady_state_error < TEMPERATURE_THRESHOLD

@@ -1,0 +1,38 @@
+# Byte-compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pytest cache
+.pytest_cache/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Shared libraries
+*.so
+
+# Debugging files
+*.log
+*.out
+*.err
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+*.bak
+*.~*
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Build and object files
+*.o
+*.a
+*.d
+*.dSYM/
+
