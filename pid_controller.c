@@ -1,42 +1,102 @@
+/**
+ * Project: PID Controller
+ *
+ * @file pid_controller.c
+ *
+ * @brief test code for dual output PID controller
+ *
+ * @author _art_of_electronics_
+ * @date 2024.11.20
+ * @version v1.0
+ *
+ * @copyright 2024 _art_of_electronics_
+*/
+
+/*****************************************************************************
+                                    INCLUDES
+*****************************************************************************/
+
 #include <stdint.h>
+#include "pid_controller.h"
 
-void PID_Update(float kp, float ki, float kd, float timeout,
-                float current_temp, float target_temp,
-                uint32_t delta_time_ms,
-                uint8_t *heater_output, uint8_t *fan_output) {
-    static float integral_sum = 0.0f;
-    static float prev_error = 0.0f;
-    static float elapsed_time = 0.0f; // Accumulate elapsed time for timeout handling
 
-    float error = target_temp - current_temp;
-    elapsed_time += delta_time_ms / 1000.0f;
+/*****************************************************************************
+                          PRIVATE DEFINES / MACROS
+*****************************************************************************/
 
-    // Check timeout
-    if (elapsed_time > timeout) {
-        *heater_output = 0;
-        *fan_output = 0;
-        return;
-    }
+#define MIN_OUTPUT_VALUE  (0U)
+#define MAX_OUTPUT_VALUE  (100U)
+#define TIME_INTERVAL     (1000.0f)
 
-    // Integral term
-    integral_sum += error * (delta_time_ms / 1000.0f);
 
-    // Derivative term
-    float derivative = (error - prev_error) / (delta_time_ms / 1000.0f);
+/*****************************************************************************
+                     PRIVATE STRUCTS / ENUMS / VARIABLES
+*****************************************************************************/
 
-    // PID output
-    float output = (kp * error) + (ki * integral_sum) + (kd * derivative);
+static float sPidIntegralSum = 0.0f;
+static float sPidPreviousError = 0.0f;
+static float sPidTimeElapsed = 0.0f;
 
-    // Determine heater and fan output
-    if (output > 0) {
-        *heater_output = (output > 100) ? 100 : (uint8_t)output;
-        *fan_output = 0;
-    } else {
-        *fan_output = (-output > 100) ? 100 : (uint8_t)(-output);
-        *heater_output = 0;
-    }
 
-    // Update previous error
-    prev_error = error;
+/*****************************************************************************
+                         PRIVATE FUNCTION DECLARATION
+*****************************************************************************/
+
+
+/*****************************************************************************
+                           INTERFACE IMPLEMENTATION
+*****************************************************************************/
+
+void PID_Update(float kp, float ki, float kd, float timeout,                  \
+                float currentTemp, float targetTemp, uint32_t timeDelta_ms,  \
+                uint8_t *outputHeater, uint8_t *outputFan)
+{
+  /*
+  static float sPidIntegralSum = 0.0f;
+  static float sPidPreviousError = 0.0f;
+  static float sPidTimeElapsed = 0.0f;
+  */
+
+  float error = targetTemp - currentTemp;
+  sPidTimeElapsed += timeDelta_ms / TIME_INTERVAL;
+
+  ///< Check timeout
+  if (sPidTimeElapsed > timeout)
+  {
+    *outputHeater = MIN_OUTPUT_VALUE;
+    *outputFan = MIN_OUTPUT_VALUE;
+    return;
+  }
+
+  ///< Integral term
+  sPidIntegralSum += error * (timeDelta_ms / TIME_INTERVAL);
+
+  ///< Derivative term
+  float derivative = (error - sPidPreviousError) / (timeDelta_ms / TIME_INTERVAL);
+
+  ///< PID output
+  float output = (kp * error) + (ki * sPidIntegralSum) + (kd * derivative);
+
+  ///< Determine heater and fan output
+  if (output > MIN_OUTPUT_VALUE)
+  {
+    *outputHeater = (output > MAX_OUTPUT_VALUE) ? MAX_OUTPUT_VALUE : (uint8_t)output;
+    *outputFan = MIN_OUTPUT_VALUE;
+  }
+  else
+  {
+    *outputFan = (-output > MAX_OUTPUT_VALUE) ? MAX_OUTPUT_VALUE : (uint8_t)(-output);
+    *outputHeater = MIN_OUTPUT_VALUE;
+  }
+
+  ///< Update previous error
+  sPidPreviousError = error;
 }
 
+
+/*****************************************************************************
+                        PRIVATE FUNCTION IMPLEMENTATION
+*****************************************************************************/
+
+
+/******************************** END OF FILE *******************************/

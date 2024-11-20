@@ -2,6 +2,7 @@ import os
 import json
 import matplotlib.pyplot as plt
 
+
 # Load simulation results
 results_file = "simulation_results.json"
 if not os.path.exists(results_file):

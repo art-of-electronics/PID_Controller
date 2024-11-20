@@ -17,12 +17,14 @@ pid_lib.PID_Update.argtypes = [
     ctypes.POINTER(ctypes.c_uint8), ctypes.POINTER(ctypes.c_uint8)
 ]
 
+
 # Simulation function to emulate system behavior
 def temperature_model(temp, heater, fan, ambient_temp=20, heater_rate=0.5, fan_rate=0.7):
     """Simulates temperature changes based on heater and fan outputs."""
     temp += heater * heater_rate - fan * fan_rate
     temp += (ambient_temp - temp) * 0.01  # Gradual approach to ambient temperature
     return temp
+
 
 # Python wrapper for C PID function
 def pid_update(kp, ki, kd, timeout, current_temp, target_temp, delta_time_ms):
@@ -35,10 +37,12 @@ def pid_update(kp, ki, kd, timeout, current_temp, target_temp, delta_time_ms):
 
     return heater.value, fan.value
 
+
 # Pytest fixture for reusable setup
 @pytest.fixture
 def pid_params():
     return {"kp": 1.4, "ki": 0.15, "kd": 0.02, "timeout": 100.0}
+
 
 # Basic test case
 def test_pid_c(pid_params):
@@ -48,6 +52,7 @@ def test_pid_c(pid_params):
     )
     assert heater > 0
     assert fan == 0
+
 
 # Test with simulation and plotting
 def test_pid_with_simulation(pid_params):
@@ -64,15 +69,16 @@ def test_pid_with_simulation(pid_params):
         current_temp = temperature_model(current_temp, heater, fan)
         history.append(round(current_temp, 3))
     test_results.append({
-    "kp": pid_params["kp"],
-    "ki": pid_params["ki"],
-    "kd": pid_params["kd"],
-    "history": history,
-    "target_temp": target_temp
+        "kp": pid_params["kp"],
+        "ki": pid_params["ki"],
+        "kd": pid_params["kd"],
+        "history": history,
+        "target_temp": target_temp
     })
 
     # Assert the system stabilizes near the target
     assert abs(history[-1] - target_temp) < TEMPERATURE_THRESHOLD
+
 
 # Parameterized tuning test
 @pytest.mark.parametrize("kp, ki, kd", [
@@ -93,11 +99,11 @@ def test_pid_tuning(kp, ki, kd):
         history.append(round(current_temp,3))
         
     test_results.append({
-    "kp": kp,
-    "ki": ki,
-    "kd": kd,
-    "history": history,
-    "target_temp": target_temp
+        "kp": kp,
+        "ki": ki,
+        "kd": kd,
+        "history": history,
+        "target_temp": target_temp
     })
 
     results_file = "simulation_results.json"
