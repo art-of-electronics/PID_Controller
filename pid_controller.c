@@ -51,11 +51,6 @@ void PID_Update(float kp, float ki, float kd, float timeout,                  \
                 float currentTemp, float targetTemp, uint32_t timeDelta_ms,  \
                 uint8_t *outputHeater, uint8_t *outputFan)
 {
-  /*
-  static float sPidIntegralSum = 0.0f;
-  static float sPidPreviousError = 0.0f;
-  static float sPidTimeElapsed = 0.0f;
-  */
 
   float error = targetTemp - currentTemp;
   sPidTimeElapsed += timeDelta_ms / TIME_INTERVAL;
