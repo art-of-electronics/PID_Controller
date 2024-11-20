@@ -63,6 +63,8 @@ Having a pass / fail is good, but even better would be to have a visualization i
 python3 plot_results.py
 ```
 
-This will generate a `combined_pid_simulation.png` figure with all the results collected from the pytest simulation. 
+This will generate a `combined_pid_simulation.png` figure with all the results collected from the pytest simulation. Something like this:
+
+![](/combined_pid_simulation.png)
 
 ---
