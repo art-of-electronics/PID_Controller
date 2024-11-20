@@ -1,3 +1,5 @@
+# Copyright 2024 _art_of_electronics_
+
 import pytest
 import ctypes
 import json
